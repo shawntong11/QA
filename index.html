@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>口语问答自测</title>
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --panel:#FFFFFF;
+    --panel-hi:#F4F6F7;
+    --line:#E3E7EA;
+    --ink:#1C2126;
+    --ink-dim:#78828B;
+    --amber:#CC7A2E;
+    --amber-dim:#D8AE7C;
+    --teal:#1E9B76;
+    --red:#D9503F;
+    --story:#2E6FCC;
+    --dafa:#B0642F;
+    --font-display: Georgia, 'Songti SC', 'Noto Serif SC', serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'SF Mono', 'Consolas', monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#FCFDFD;
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header{margin-bottom:22px;}
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    color:var(--amber);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-size:30px;
+    font-weight:600;
+    margin:0 0 6px;
+    letter-spacing:.01em;
+  }
+  .sub{color:var(--ink-dim);font-size:13.5px;line-height:1.6;}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(28,33,38,0.03), 0 6px 20px rgba(28,33,38,0.04);
+  }
+  .card h2{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin:0 0 14px;
+  }
+
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .row.between{justify-content:space-between;}
+
+  button{
+    font-family:var(--font-body);
+    font-size:14px;
+    font-weight:600;
+    padding:9px 16px;
+    border-radius:8px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  button:active{transform:scale(.97);}
+  button:disabled{opacity:.35;cursor:not-allowed;}
+
+  .btn-primary{background:var(--amber);color:#FFFFFF;}
+  .btn-primary:hover:not(:disabled){opacity:.9;}
+  .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);font-size:13px;padding:7px 12px;}
+  .btn-ghost:hover:not(:disabled){border-color:var(--amber-dim);}
+  .btn-icon{
+    background:var(--panel-hi);
+    border-color:var(--line);
+    color:var(--ink);
+    width:44px;height:44px;
+    border-radius:50%;
+    font-size:17px;
+    display:flex;align-items:center;justify-content:center;
+    padding:0;
+  }
+  .btn-icon:hover:not(:disabled){border-color:var(--amber-dim);}
+  .btn-mic{
+    background:var(--panel-hi);
+    border-color:var(--line);
+    color:var(--ink);
+    width:64px;height:64px;
+    border-radius:50%;
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+    padding:0;
+  }
+  .btn-mic.listening{
+    background:var(--red);
+    border-color:var(--red);
+    color:#FFFFFF;
+    box-shadow:0 0 0 6px rgba(217,80,63,0.14);
+  }
+  .btn-mic.speaking{
+    background:var(--teal);
+    border-color:var(--teal);
+    color:#FFFFFF;
+  }
+
+  select{
+    background:var(--panel-hi);
+    color:var(--ink);
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    padding:6px 8px;
+  }
+
+  /* 双题库两栏 */
+  .banks{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:640px){
+    .banks{grid-template-columns:1fr;}
+  }
+  .bank-col{
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .bank-head{
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+  }
+  .bank-title{
+    font-family:var(--font-display);
+    font-size:17px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .bank-col.story .dot{background:var(--story);}
+  .bank-col.dafa .dot{background:var(--dafa);}
+  .bank-count{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--ink-dim);
+  }
+  .bank-list{
+    max-height:340px;
+    overflow-y:auto;
+    padding:6px;
+  }
+  .qitem{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    padding:9px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--ink);
+  }
+  .qitem:hover{background:var(--panel-hi);}
+  .qitem.active{
+    background:var(--panel-hi);
+    box-shadow:inset 3px 0 0 var(--amber);
+    font-weight:600;
+  }
+  .qitem .qi-num{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--ink-dim);
+    min-width:22px;
+    padding-top:1px;
+  }
+  .qitem.visited .qi-num{color:var(--teal);}
+  .qitem.visited::after{content:'✓';color:var(--teal);font-size:11px;margin-left:auto;padding-top:2px;}
+
+  /* 作答区 */
+  .empty{
+    text-align:center;
+    padding:36px 12px;
+    color:var(--ink-dim);
+    font-size:14px;
+  }
+  .qbox{display:none;}
+  .qmeta{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--ink-dim);
+    letter-spacing:.08em;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .qmeta .tag{
+    padding:2px 8px;
+    border-radius:20px;
+    font-size:10px;
+    color:#fff;
+  }
+  .qmeta .tag.story{background:var(--story);}
+  .qmeta .tag.dafa{background:var(--dafa);}
+  .question-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .question{
+    font-family:var(--font-display);
+    font-size:21px;
+    line-height:1.5;
+    color:var(--ink);
+    margin-bottom:4px;
+    flex:1;
+  }
+  .mic-area{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin:20px 0 6px;
+  }
+  .waveform{
+    display:flex;
+    align-items:center;
+    gap:3px;
+    height:36px;
+    flex:1;
+  }
+  .waveform span{
+    display:block;
+    width:4px;
+    border-radius:2px;
+    background:var(--line);
+    height:6px;
+    transition:height .1s ease, background .15s ease;
+  }
+  .waveform.active span{background:var(--red);}
+  .mic-label{font-size:12px;color:var(--ink-dim);font-family:var(--font-mono);}
+  textarea{
+    width:100%;
+    background:var(--panel-hi);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--ink);
+    font-family:var(--font-mono);
+    font-size:13px;
+    padding:12px;
+    resize:vertical;
+    line-height:1.6;
+  }
+  #transcript{min-height:70px;margin-top:6px;}
+
+  .stats{
+    display:flex;
+    gap:18px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+  .stats b{color:var(--amber);font-size:15px;font-family:var(--font-body);}
+
+  .warn{
+    background:rgba(217,80,63,0.06);
+    border:1px solid rgba(217,80,63,0.25);
+    color:#A83E2F;
+    font-size:12.5px;
+    padding:10px 12px;
+    border-radius:8px;
+    margin-top:10px;
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Oral Quiz Trainer</div>
+    <h1>口语问答自测</h1>
+    <div class="sub">分别点击「故事」或「大法」题库里的任意一题 → 系统语音播报题目 → 对着麦克风口头回答，练习你的表达。</div>
+  </header>
+
+  <!-- 双题库 -->
+  <div class="card">
+    <div class="row between" style="margin-bottom:14px;">
+      <h2 style="margin:0;">题库</h2>
+      <div class="row">
+        <select id="langSelect">
+          <option value="zh-CN">中文</option>
+          <option value="en-US">English</option>
+        </select>
+        <button class="btn-ghost" id="ttsToggleBtn">🔊 语音播报：开</button>
+      </div>
+    </div>
+    <div class="banks">
+      <div class="bank-col story">
+        <div class="bank-head">
+          <div class="bank-title"><span class="dot"></span>故事</div>
+          <div class="row">
+            <span class="bank-count" id="storyCount"></span>
+            <button class="btn-ghost" id="storyRandomBtn">🔀 随机</button>
+          </div>
+        </div>
+        <div class="bank-list" id="storyList"></div>
+      </div>
+      <div class="bank-col dafa">
+        <div class="bank-head">
+          <div class="bank-title"><span class="dot"></span>大法</div>
+          <div class="row">
+            <span class="bank-count" id="dafaCount"></span>
+            <button class="btn-ghost" id="dafaRandomBtn">🔀 随机</button>
+          </div>
+        </div>
+        <div class="bank-list" id="dafaList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 作答区 -->
+  <div class="card">
+    <div class="row between">
+      <h2 style="margin:0;">作答</h2>
+      <div class="stats" id="statsBar"></div>
+    </div>
+
+    <div class="empty" id="emptyState">从上面「故事」或「大法」题库里点一道题开始。</div>
+
+    <div class="qbox" id="qbox">
+      <div class="qmeta" id="qmeta"></div>
+      <div class="question-row">
+        <div class="question" id="questionText"></div>
+        <button class="btn-icon" id="replayBtn" title="重新播报题目">🔊</button>
+      </div>
+
+      <div class="mic-area">
+        <button class="btn-mic" id="micBtn" title="按下开始/停止录音">🎤</button>
+        <div class="waveform" id="waveform"></div>
+      </div>
+      <div class="mic-label" id="micLabel">题目播报完毕后，点击麦克风开始口语作答</div>
+
+      <textarea id="transcript" rows="3" placeholder="你说的内容会实时转成文字显示在这里，仅供自己回顾，不会打分…"></textarea>
+
+      <div id="speechWarn" class="warn" style="display:none;">
+        当前浏览器不支持语音识别（建议使用 Chrome）。语音播报题目功能不受影响。
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const STORY_QUESTIONS = ["外婆什么时候修炼法轮功？", "外婆是怎么被迫害的？", "你外婆修炼法轮功被迫害，你为什么还要入党、考公务员？", "外婆修炼法轮功，你为什么还能通过政审？", "你是什么时候知道外婆修炼法轮功的？", "你家人对中共的态度是怎么样的？", "什么时候提交的入党申请书？", "为什么大学没有入党？研究生入党？", "为什么要入党？", "你在大学，如果不入党，具体会发生什么后果？", "哪个老师建议你入党？", "你是不是为了“个人利益”入党？", "你入党时，怎么看待中共？", "你在党内担任什么职务？", "你参加了哪些党组织活动", "党课主要是什么形式", "你家人里有没有党员？", "《思想汇报》多久写一次？", "最后一次交党费是什么时候？", "你什么时候提出退党申请的？", "你退党多久了？", "在美国，你有没有在全球退党服务中心办理\"三退\"？", "为什么2026年1月才办《退党证明》？", "党支部后来有没有找你？", "褚海涛是谁？党支部为什么会有褚海涛的联系方式？", "你具体工作单位是哪里？", "你报考公务员时，招录的岗位是什么？", "你的工作单位？具体职位？", "你的档案、党组织关系在哪里？哪个部门给你发工资？", "你是不是属于公务员？", "为什么要考公务员？", "公务员为什么会被安排到村委会工作？", "是哪个部门通知你取消录用的？谁通知你的？", "为什么《取消录用通知书》是上海市公务员局发的？而不是浦东、曹路镇", "你为什么被取消录用/开除？", "在村委会主要做什么工作", "新星村的组织架构", "你是村委会员工，为什么被派到居委会？", "当时谁通知你去居委会？", "阳光苑第二居委会的组织架构", "在居委会主要工作", "你怎么知道转运人员有很多老人小孩？", "在居委会，你还看到了哪些不合理的地方？", "4月10日那天具体发生了什么？你说了什么？居委会主任怎么回应？", "领导让你们打电话通知感染居民说什么？这属于迫害别人吗？", "你有没有迫害他人？", "2022年4月11日-8月10日，这4个月，领导有没有联系你？", "2022年4月11日-8月10日，这4个月，你在干什么？", "2022年8月到11月，这4个月，你在干什么？", "你4月回家到8月开除，这段时间发生了什么", "什么时候开始翻墙、为什么", "怎么学会翻墙 / 什么时候知道翻墙的？", "以前翻墙时，为什么没了解中共的罪恶？", "明知道翻墙有危险，为什么2022年要开始翻墙了", "在中国通过VPN浏览境外网站，会有什么后果？", "你用什么翻墙软件 VPN？", "你翻墙的频率？", "翻墙后，看了哪些东西？", "什么时候开始发推特？", "为什么4月翻墙，6月才发推特", "第一条推特是什么，什么时候发的", "推特账号，发了多少推文，有多少粉丝，关注了多少人", "推文有多少是自己写、转发的", "你主要发什么推文", "推特关注了哪些人", "中共怎么知道你的推特账户？", "你推特粉丝只有50人，只有几个人看，中共怎么会注意到毫无影响力的账号？", "你为什么要去现场？目的是参加抗议，还只是旁观、路过？=动机", "你一个人去的吗", "警察为什么要拦截你？是随机拦截你，还是专门针对你？", "当时有几个警察查你", "查了多少时间？", "警察查了什么内容？", "警察问了你什么？", "当时，你用的什么手机？手机号？", "后来，你用的什么手机、手机号？", "手机里的外国软件有哪些？", "警察有没有当场打开APP看？", "这些软件有没有当场删除？", "警察为什么要扣你手机？", "警察有没有给你《扣押清单/收据》？", "警察为什么放你走了？为什么不带你去派出所", "警察登记了你哪些信息？", "你留的是什么地址？", "手机被警察扣押了，你回家后为什么不删除之前的推文？", "你为什么不创建一个新的推特", "警察怎么知道你的推特账号", "你的手机上有哪些资料？", "你回家后，做了什么？", "你当时有没有告诉任何人？", "为什么要逃离中国？", "警察怎么知道你发政治言论、修炼法轮功？", "你是怎么拿到护照的？", "2022.11.29-12.11这段时间，你做了什么？", "你和谁说过出国的事？", "你为什么能顺利离开中国？没有海关边控、阻拦吗？", "你经过几个国家，走了多少天？", "为什么不在韩国申请政治庇护？", "为什么没有在沿途国家申请庇护？", "为什么要来美国申请庇护？", "为什么不申请签证，而要走线来美国？", "你什么时候知道走线、美国庇护的？", "你高学历，在中国也能生活很好，为什么要走线、申请庇护？", "是不是来美国赚钱?", "你是不是在中国找不到工作，才来美国？", "你是不是中共间谍?", "为什么害怕回中国?  = 中共为什么要迫害你？", "你去中国其他城市，还会迫害吗？", "中共怎么知道你出国、修炼法轮功、发表政治言论", "你为什么要拒绝警察加你好友", "为什么警察骚扰的是你浦东室友，而不是嘉定室友", "警察说\"回国肯定逮捕你\"，你是怎么知道的？", "父母有没有录音或书面证据", "你父母为什么不换手机号、不搬家", "证人怎么把证明信给你", "你平时和家人、室友怎么联系", "为什么公司在德州？", "你在美国做什么工作？", "为什么不来移民局报道？", "你有没有申请或使用任何政府福利？", "你对美国有什么贡献？", "在美国3年半，你做了哪些事？", "如果留在美国，你未来计划？"];
+const DAFA_QUESTIONS = ["什么时候开始正式修炼法轮功？=时间", "怎么接触到法轮功的？= 路径", "为什么要修炼法轮功？ = 动机", "法轮功被中国政府定义为邪教，你为什么还要修炼？", "你是不是到美国为了办身份，才修炼法轮功？", "怎么学会五套功法的？", "在哪里修炼?", "2022年你在中国时，为什么在推特上敢发政治言论，但没有发表法轮功的内容？", "你在美国是否继续参加法轮功活动", "平时怎么学法练功 / 日常修炼细节", "每天什么时候练功", "在哪练功、多久", "在哪打坐、多久", "每周和同修学法，时间、地点", "大组学法、小组学法，时间、地点、人数，群名叫什么", "集体学法的形式是怎么样的", "在哪集体练功", "集体练功的人", "什么时候加入舞狮队", "舞狮队人数，都有谁", "你在舞狮队做什么？", "个人陈述写，你在舞狮队敲锣。但是游行照片里，你在敲钹？", "舞狮队平时练习吗", "证人吴顺珍和你什么关系？", "为什么舞狮队没有人给你写证明信？", "你从什么时候开始看神韵演出的？看过几次？在哪里看的", "看完神韵后有什么感受？", "神韵印象最深的节目是什么", "神韵义工做什么工作", "为什么没有站点", "法轮功是什么？", "气功是什么", "法轮功和其他气功，有什么区别？", "法轮功算佛教吗？和传统佛教有什么区别？", "法轮功是政治组织吗？", "5套功法，分别是什么", "5套功法总体作用、每套功法的作用", "口述5套功法怎么做？", "你在练功时，身体、心理感受？", "举例，修炼给你带来了什么改变？", "《转法轮》主要讲什么", "你怎么看待《转法轮》里反科学的内容", "《转法轮》里让你印象最深的内容是什么？", "法轮功有多少本书", "你读过哪些法轮功书籍?", "各书籍概括", "什么是发正念？", "怎么发正念？", "法轮功是什么时候开始传法", "425中南海上访是怎么回事", "为什么中共之前很支持法轮功，又突然开始迫害法轮功？", "中共什么时候开始迫害法轮功？中共如何迫害法轮功？", "什么是三退？", "退党网站的名称是什么？", "为什么你在2026年1月才办理《三退证明》？", "《九评共产党》主要内容是什么？", "你怎么看待中共？中共的本质是什么", "\"讲真相\"，你做过什么具体的事", "法轮功是什么？", "气功是什么？", "法轮是什么？", "法轮图案是什么？", "法轮世界是什么？", "五套功法名称是什么？", "大法弟子要做的“三件事”是什么？", "什么是“真、善、忍”？", "什么是心性？", "什么是修心性", "什么是执着心？", "什么是去执着心 ？", "什么是性命双修？", "修炼目的是什么？", "德、业，是什么？", "什么是消业？", "功、功柱、功能、是什么", "天目是什么", "什么是开天目", "松果体是什么", "遥视是什么", "宿命通是什么", "什么是五行", "什么是三界", "什么是主意识？什么是副意识？", "附体是什么？", "能量场是什么？", "灌顶是什么？", "结丹是什么？", "元婴是什么？"];
+const TOTAL = STORY_QUESTIONS.length + DAFA_QUESTIONS.length;
+
+let current = null; // {cat:'story'|'dafa', idx:number}
+let visitedStory = new Set();
+let visitedDafa = new Set();
+let recognition = null;
+let listening = false;
+let waveformInterval = null;
+let ttsEnabled = true;
+
+// ---------- 渲染两个题库列表 ----------
+function renderList(containerId, questions, cat) {
+  const el = $(containerId);
+  el.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const item = document.createElement('div');
+    item.className = 'qitem';
+    item.dataset.cat = cat;
+    item.dataset.idx = idx;
+    item.innerHTML = `<span class="qi-num">${idx + 1}</span><span>${escapeHtml(q)}</span>`;
+    item.addEventListener('click', () => selectQuestion(cat, idx));
+    el.appendChild(item);
+  });
+}
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+renderList('storyList', STORY_QUESTIONS, 'story');
+renderList('dafaList', DAFA_QUESTIONS, 'dafa');
+$('storyCount').textContent = `共 ${STORY_QUESTIONS.length} 题`;
+$('dafaCount').textContent = `共 ${DAFA_QUESTIONS.length} 题`;
+
+// ---------- 选题 ----------
+function selectQuestion(cat, idx) {
+  current = { cat, idx };
+  const list = cat === 'story' ? STORY_QUESTIONS : DAFA_QUESTIONS;
+  const visited = cat === 'story' ? visitedStory : visitedDafa;
+  visited.add(idx);
+
+  // 更新高亮
+  document.querySelectorAll('.qitem').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.qitem').forEach(el => {
+    const c = el.dataset.cat, i = Number(el.dataset.idx);
+    const v = c === 'story' ? visitedStory : visitedDafa;
+    el.classList.toggle('visited', v.has(i));
+  });
+  const activeEl = document.querySelector(`.qitem[data-cat="${cat}"][data-idx="${idx}"]`);
+  if (activeEl) {
+    activeEl.classList.add('active');
+    activeEl.scrollIntoView({ block: 'nearest' });
+  }
+
+  const text = list[idx];
+  $('questionText').textContent = text;
+  const tagLabel = cat === 'story' ? '故事' : '大法';
+  $('qmeta').innerHTML = `<span class="tag ${cat}">${tagLabel}</span>第 ${idx + 1} 题 / 共 ${list.length} 题`;
+  $('transcript').value = '';
+  $('emptyState').style.display = 'none';
+  $('qbox').style.display = 'block';
+  updateStats();
+  stopListening();
+  speakQuestion(text);
+}
+
+$('storyRandomBtn').addEventListener('click', () => {
+  if (STORY_QUESTIONS.length === 0) return;
+  let idx = Math.floor(Math.random() * STORY_QUESTIONS.length);
+  if (STORY_QUESTIONS.length > 1 && current && current.cat === 'story') {
+    while (idx === current.idx) idx = Math.floor(Math.random() * STORY_QUESTIONS.length);
+  }
+  selectQuestion('story', idx);
+});
+$('dafaRandomBtn').addEventListener('click', () => {
+  if (DAFA_QUESTIONS.length === 0) return;
+  let idx = Math.floor(Math.random() * DAFA_QUESTIONS.length);
+  if (DAFA_QUESTIONS.length > 1 && current && current.cat === 'dafa') {
+    while (idx === current.idx) idx = Math.floor(Math.random() * DAFA_QUESTIONS.length);
+  }
+  selectQuestion('dafa', idx);
+});
+$('replayBtn').addEventListener('click', () => {
+  if (current) {
+    const list = current.cat === 'story' ? STORY_QUESTIONS : DAFA_QUESTIONS;
+    speakQuestion(list[current.idx]);
+  }
+});
+
+function updateStats() {
+  const visitedTotal = visitedStory.size + visitedDafa.size;
+  $('statsBar').innerHTML = `<span><b>${visitedTotal}</b> / ${TOTAL} 已练习</span><span><b>${visitedStory.size}</b> 故事</span><span><b>${visitedDafa.size}</b> 大法</span>`;
+}
+updateStats();
+
+// ---------- 语音播报（TTS，优先选女声） ----------
+let voicesCache = [];
+function loadVoices() {
+  voicesCache = window.speechSynthesis.getVoices();
+}
+if ('speechSynthesis' in window) {
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function pickFemaleVoice(lang) {
+  const prefix = lang.split('-')[0].toLowerCase();
+  const candidates = voicesCache.filter(v => v.lang && v.lang.toLowerCase().startsWith(prefix));
+  const femaleHint = /female|女声|婷婷|晓晓|晓伊|瑶瑶|慧慧|静|Ting-?Ting|Mei-?Jia|Xiaoxiao|Yaoyao|Huihui|Zira|Samantha|Susan|Karen|Moira|Tessa|Fiona|Google.*(US|UK|普通话|國語).*Female/i;
+  return candidates.find(v => femaleHint.test(v.name)) || candidates[0] || null;
+}
+
+function speakQuestion(text) {
+  if (!ttsEnabled) {
+    $('micLabel').textContent = '语音播报已关闭 · 点击麦克风开始口语作答';
+    return;
+  }
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = $('langSelect').value;
+  const voice = pickFemaleVoice(utter.lang);
+  if (voice) utter.voice = voice;
+  utter.pitch = 1.05;
+  utter.rate = 0.8;
+  $('micBtn').disabled = true;
+  $('replayBtn').classList.add('speaking');
+  $('micLabel').textContent = '🔊 正在播报题目…';
+  utter.onend = () => {
+    $('micBtn').disabled = false;
+    $('replayBtn').classList.remove('speaking');
+    $('micLabel').textContent = '点击麦克风开始口语作答';
+  };
+  utter.onerror = () => {
+    $('micBtn').disabled = false;
+    $('replayBtn').classList.remove('speaking');
+    $('micLabel').textContent = '点击麦克风开始口语作答';
+  };
+  window.speechSynthesis.speak(utter);
+}
+
+$('ttsToggleBtn').addEventListener('click', () => {
+  ttsEnabled = !ttsEnabled;
+  $('ttsToggleBtn').textContent = ttsEnabled ? '🔊 语音播报：开' : '🔇 语音播报：关';
+  if (!ttsEnabled && 'speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    $('micBtn').disabled = false;
+    $('replayBtn').classList.remove('speaking');
+    $('micLabel').textContent = '语音播报已关闭 · 点击麦克风开始口语作答';
+  }
+});
+$('langSelect').addEventListener('change', () => {
+  if (recognition) recognition.lang = $('langSelect').value;
+});
+
+// ---------- 语音识别（听写作答） ----------
+const waveEl = $('waveform');
+for (let i = 0; i < 28; i++) {
+  const bar = document.createElement('span');
+  waveEl.appendChild(bar);
+}
+
+function setupRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    $('speechWarn').style.display = 'block';
+    $('micBtn').disabled = true;
+    return;
+  }
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = $('langSelect').value;
+
+  recognition.onresult = (event) => {
+    let finalText = '';
+    let interimText = '';
+    for (let i = 0; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalText += t;
+      else interimText += t;
+    }
+    $('transcript').value = (finalText + ' ' + interimText).trim();
+  };
+  recognition.onerror = (e) => {
+    $('micLabel').textContent = '识别出错（' + e.error + '）';
+    stopListening();
+  };
+  recognition.onend = () => {
+    if (listening) {
+      try { recognition.start(); } catch (e) { stopListening(); }
+    }
+  };
+}
+setupRecognition();
+
+function startListening() {
+  if (!recognition) return;
+  listening = true;
+  $('micBtn').classList.add('listening');
+  $('micBtn').textContent = '⏹';
+  $('micLabel').textContent = '正在聆听… 再次点击停止';
+  waveEl.classList.add('active');
+  waveformInterval = setInterval(() => {
+    waveEl.querySelectorAll('span').forEach(s => {
+      s.style.height = (listening ? (4 + Math.random() * 28) : 6) + 'px';
+    });
+  }, 120);
+  try { recognition.start(); } catch (e) {}
+}
+function stopListening() {
+  listening = false;
+  $('micBtn').classList.remove('listening');
+  $('micBtn').textContent = '🎤';
+  waveEl.classList.remove('active');
+  clearInterval(waveformInterval);
+  waveEl.querySelectorAll('span').forEach(s => s.style.height = '6px');
+  if (recognition) { try { recognition.stop(); } catch (e) {} }
+}
+$('micBtn').addEventListener('click', () => {
+  if (listening) stopListening(); else startListening();
+});
+</script>
+</body>
+</html>
